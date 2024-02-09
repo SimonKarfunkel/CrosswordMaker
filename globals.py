@@ -1,0 +1,12 @@
+root = None
+direction = 0   #Setting to horizontal or vertical progression
+temp_direction = 0
+arrow_key_pressed = False
+font = "Comic Sans"
+sidebar_frame = None  # Initialize sidebar_frame as None
+filtering_enabled = False
+dictionary_file_path = None
+filtered_content = []
+content = None
+highlighted_string = None
+grid = []

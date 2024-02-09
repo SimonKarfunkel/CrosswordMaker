@@ -418,7 +418,7 @@ class CrosswordSquare:
 
         # Create or update the canvas text item with the new text and font, center-aligned
         if text_item:
-            self.canvas.itemconfig(text_item, text=wrapped_text, font=font, anchor="center", state="normal")
+            self.canvas.itemconfig(text_item, text=wrapped_text, font=font, anchor="center", state="disabled")
         else:
             text_item = self.canvas.create_text(text_x, text_y, text=wrapped_text, font=font, anchor="center", tags=f"text_{self.row}_{self.col}")
 

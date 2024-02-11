@@ -1,7 +1,6 @@
 #TODO
 #Leftclickdrag to activate several squares or make one larger
 #handle images
-#nyckelinput
 
 import tkinter as tk
 from CrosswordSquare import CrosswordSquare
@@ -67,8 +66,8 @@ globals.root.config(menu=menu_bar)
 
 
 # Set up grid dimensions
-grid_size = 50
-rows, cols = 50, 50
+#grid_size = 50
+#rows, cols = 50, 50
 
 
 
@@ -77,7 +76,7 @@ rows, cols = 50, 50
 
 
 # Create a Canvas widget to represent the grid
-canvas = tk.Canvas(globals.root, width=cols * grid_size, height=rows * grid_size)
+canvas = tk.Canvas(globals.root, width=globals.cols * globals.grid_size, height=globals.rows * globals.grid_size)
 canvas.pack()
 
 
@@ -106,7 +105,7 @@ canvas.bind("<Motion>", on_square_hover)
 
 
 # Create CrosswordSquare instances for each square in the grid
-globals.grid = [[CrosswordSquare(canvas, row, col, grid_size) for col in range(cols)] for row in range(rows)]
+globals.grid = [[CrosswordSquare(canvas, row, col, globals.grid_size) for col in range(globals.cols)] for row in range(globals.rows)]
 
 # Configure the Tkinter window to be fullscreen
 globals.root.attributes("-fullscreen", False)

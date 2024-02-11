@@ -1,6 +1,7 @@
 import globals
 import tkinter as tk
 from tkinter import filedialog
+import os
 
 
 sidebar_window = None
@@ -12,14 +13,18 @@ sidebar_text_widget = None
 def open_sidebar():
     sidebar_window.deiconify()  # Make the sidebar window visible
     # Read the globals.content of the text file
-    globals.dictionary_file_path = filedialog.askopenfilename(parent=sidebar_window, filetypes=[("Text files", "*.txt")])
+    #globals.dictionary_file_path = filedialog.askopenfilename(parent=sidebar_window, filetypes=[("Text files", "*.txt")])
     if globals.dictionary_file_path:
-        with open(globals.dictionary_file_path, "r", encoding='utf-8') as file:
+        current_directory = os.path.dirname(os.path.abspath(__file__))
+        with open(os.path.join(current_directory, globals.dictionary_file_path), "r", encoding='utf-8') as file:
             globals.content = file.read().upper()
+            sidebar_text_widget.config(state="normal")
             # Clear any existing text in the sidebar text widget
             sidebar_text_widget.delete("1.0", "end")
             # Insert the globals.content of the text file into the sidebar text widget
             sidebar_text_widget.insert("1.0", globals.content)
+            sidebar_text_widget.config(state="disabled")
+
 
 # Function to close the sidebar window
 def close_sidebar():
@@ -32,10 +37,11 @@ def toggle_filtering():
     if globals.filtering_enabled:
         filter_text_by_length(globals.highlighted_string)
     else:
+        sidebar_text_widget.config(state="normal")
         # Refresh the globals.content to show all lines
         sidebar_text_widget.delete("1.0", "end")
         sidebar_text_widget.insert("1.0", globals.content)
-
+        sidebar_text_widget.config(state="disabled")
 
 
 def filter_text_by_length(highlighted_string):
@@ -72,9 +78,75 @@ def filter_text_by_length(highlighted_string):
         if line_matches:
             filtered_final.append(line)
     
+
+    sidebar_text_widget.config(state="normal")
     # Update the text widget with filtered final
     sidebar_text_widget.delete("1.0", "end")
     sidebar_text_widget.insert("1.0", "\n".join(filtered_final))
+    sidebar_text_widget.config(state="disabled")
+
+
+def on_line_click(event):
+    # Get the index of the clicked position
+    index = sidebar_text_widget.index(tk.CURRENT)
+    # Extract line number from the index
+    line_number = index.split('.')[0]
+    # Extract line word from the index
+    globals.line_word = sidebar_text_widget.get(f"{line_number}.0", f"{line_number}.end")
+    print("Clicked on line:", globals.line_word)
+
+    next_row, next_col = globals.r, globals.c
+        
+    # Calculate the next row and column based on the globals.direction
+    if globals.direction == 0:  # Vertical progression
+        next_row -= 1
+    elif globals.direction == 1:  # Horizontal progression
+        next_col -= 1
+
+
+    #Find row/column starting square
+    while 0 <= next_row < len(globals.grid) and 0 <= next_col < len(globals.grid[0]):
+        next_sq = globals.grid[next_row][next_col]
+        if next_sq.state == "NORMAL":
+                
+            # Move to the next square in the current globals.direction
+            if globals.direction == 0:
+                next_row -= 1
+            elif globals.direction == 1:
+                next_col -= 1
+        else:
+            # Move to the next square in the current globals.direction
+            if globals.direction == 0:
+                next_row += 1
+            elif globals.direction == 1:
+                next_col += 1
+            next_sq = globals.grid[next_row][next_col]
+
+            break  # Stop highlighting if a blocked square is encountered
+
+
+    #Print out the word
+    for letter in globals.line_word:
+        next_sq.value = letter
+
+        text_item = next_sq.canvas.find_withtag(f"text_{next_row}_{next_col}")
+
+        # Calculate the position of the text relative to the square
+        text_x = next_sq.col * globals.grid_size + globals.grid_size // 2
+        text_y = next_sq.row * globals.grid_size + globals.grid_size // 2    
+
+        # Create or update the canvas text item with the new text and font, center-aligned
+        if text_item:
+            next_sq.canvas.itemconfig(text_item, text=next_sq.value, font=globals.font, anchor="center", state="disabled")
+        else:
+            text_item = next_sq.canvas.create_text(text_x, text_y, text=next_sq.value, font=globals.font, anchor="center", tags=f"text_{next_row}_{next_col}")
+
+        # Move to the next square in the current globals.direction
+        if globals.direction == 0:
+            next_row += 1
+        elif globals.direction == 1:
+            next_col += 1
+        next_sq = globals.grid[next_row][next_col]        
 
 
 #END SIDEBAR DICTIONARY FUNCTIONS------------------------------------------------------------------------
@@ -105,8 +177,9 @@ def create_sidebar():
     filter_button.pack(side="left")
 
     # Create a text widget inside the sidebar window
-    sidebar_text_widget = tk.Text(sidebar_window, wrap="word", font=("Arial", 12))
+    sidebar_text_widget = tk.Text(sidebar_window, wrap="word", font=("Arial", 12), state="normal")
     sidebar_text_widget.pack(fill="both", expand=True)
+    sidebar_text_widget.bind("<Button-1>", on_line_click)
 
     # Bind closing of sidebar window to close_sidebar function
     sidebar_window.protocol("WM_DELETE_WINDOW", close_sidebar)

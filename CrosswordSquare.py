@@ -1,6 +1,8 @@
 import textwrap
 import globals
 import textfiltering
+import tkinter as tk
+
 
 class CrosswordSquare:
     active_square = None  # Class globals.arrow_key_pressediable to store the active square
@@ -159,8 +161,8 @@ class CrosswordSquare:
         print(globals.temp_direction)
         print(globals.arrow_key_pressed)
         # Switch to the next square based on the globals.direction
-        r, c = self.row, self.col
-        next_row, next_col = r, c
+        globals.r, globals.c = self.row, self.col
+        next_row, next_col = globals.r, globals.c
 
         if globals.arrow_key_pressed:
             # Calculate the next row and column based on the arrow key globals.direction
@@ -199,8 +201,8 @@ class CrosswordSquare:
 
     def active_direction_highlight(self, highlight_colour):
         globals.num_of_highlighted_squares = 1
-        r, c = self.row, self.col
-        next_row, next_col = r, c
+        globals.r, globals.c = self.row, self.col
+        next_row, next_col = globals.r, globals.c
         if self.value:
             highlighted_letters = [self.value]  # Initialize list to store highlighted letters
         else:
@@ -230,7 +232,7 @@ class CrosswordSquare:
                 break  # Stop highlighting if a blocked square is encountered
 
         # Reset next_row and next_col to the original values before highlighting in the negative globals.direction
-        next_row, next_col = r, c
+        next_row, next_col = globals.r, globals.c
 
         # Calculate the next row and column based on the globals.direction
         if globals.direction == 0 or globals.direction == 2:  # Vertical progression
@@ -284,8 +286,6 @@ class CrosswordSquare:
     def import_images(self):
         # Implement image import logic for selected squares
         print("Importing images")
-
-    import textwrap
 
     def update_text(self):
         # Calculate the position of the text relative to the square
@@ -348,7 +348,6 @@ class CrosswordSquare:
                     line_width = line_bbox[2] - line_bbox[0]  # Calculate the width of the line
                     horizontal_offset = (self.grid_size - line_width) // 2  # Calculate horizontal offset
                     self.canvas.move(line_tag, horizontal_offset, 0)  # Move the line to center it horizontally
-
 
 
         # Delete temporary text items

@@ -8,7 +8,6 @@ import globals
 import textfiltering
 
 
-
 def dummy_command():
     print("This is a dummy command")
 
@@ -65,19 +64,10 @@ globals.root.config(menu=menu_bar)
 
 
 
-# Set up grid dimensions
-#grid_size = 50
-#rows, cols = 50, 50
-
-
-
-
-
-
 
 # Create a Canvas widget to represent the grid
-canvas = tk.Canvas(globals.root, width=globals.cols * globals.grid_size, height=globals.rows * globals.grid_size)
-canvas.pack()
+globals.canvas = tk.Canvas(globals.root, width=globals.cols * globals.grid_size, height=globals.rows * globals.grid_size)
+globals.canvas.pack()
 
 
 
@@ -93,19 +83,19 @@ def stop_drag(event):
 
 def on_square_hover(event):
     if is_dragging:
-        item_id = canvas.find_closest(event.x, event.y)
-        row, col = map(int, canvas.gettags(item_id)[0].split('_'))
+        item_id = globals.canvas.find_closest(event.x, event.y)
+        row, col = map(int, globals.canvas.gettags(item_id)[0].split('_'))
         globals.grid[row][col].on_square_click(event)
 
 # Set up drag-and-drop variables
 is_dragging = False
-canvas.bind("<ButtonPress-1>", start_drag)
-canvas.bind("<ButtonRelease-1>", stop_drag)
-canvas.bind("<Motion>", on_square_hover)
+globals.canvas.bind("<ButtonPress-1>", start_drag)
+globals.canvas.bind("<ButtonRelease-1>", stop_drag)
+globals.canvas.bind("<Motion>", on_square_hover)
 
 
 # Create CrosswordSquare instances for each square in the grid
-globals.grid = [[CrosswordSquare(canvas, row, col, globals.grid_size) for col in range(globals.cols)] for row in range(globals.rows)]
+globals.grid = [[CrosswordSquare(globals.canvas, row, col, globals.grid_size) for col in range(globals.cols)] for row in range(globals.rows)]
 
 # Configure the Tkinter window to be fullscreen
 globals.root.attributes("-fullscreen", False)

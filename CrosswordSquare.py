@@ -2,6 +2,8 @@ import textwrap
 import globals
 import textfiltering
 import tkinter as tk
+import imagefunctions
+
 
 
 class CrosswordSquare:
@@ -270,7 +272,7 @@ class CrosswordSquare:
         popup_menu = tk.Menu(self.canvas, tearoff=0)
         popup_menu.add_command(label="Key Square", command=self.add_key_square)
         popup_menu.add_command(label="Join Squares", command=self.join_squares)
-        popup_menu.add_command(label="Import Images", command=self.import_images)
+        popup_menu.add_command(label="Import Image", command=self.import_image)
         popup_menu.post(event.x_root, event.y_root)
 
     def add_key_square(self):
@@ -283,8 +285,9 @@ class CrosswordSquare:
         # Implement joining logic for selected squares
         print("Joining squares")
 
-    def import_images(self):
+    def import_image(self):
         # Implement image import logic for selected squares
+        imagefunctions.import_image(globals.canvas, self)
         print("Importing images")
 
     def update_text(self):

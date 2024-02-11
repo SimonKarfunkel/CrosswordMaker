@@ -1,4 +1,5 @@
 root = None
+canvas = None
 direction = 0   #Setting to horizontal or vertical progression
 temp_direction = 0
 arrow_key_pressed = False
@@ -17,3 +18,4 @@ c = None    #column of active square
 # Set up grid dimensions
 grid_size = 50
 rows, cols = 50, 50
+image_tk = None

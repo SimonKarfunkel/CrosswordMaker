@@ -7,7 +7,7 @@ import imagefunctions
 
 
 class CrosswordSquare:
-    active_square = None  # Class globals.arrow_key_pressediable to store the active square
+    active_square = None  # Class Variable to store the active square
     selected_squares = set()  # Store selected squares
     selection_rect = None
 
@@ -38,8 +38,8 @@ class CrosswordSquare:
 
             return  # Do not change the state if the square is in the "BLOCK" or "KEY" state
 
-
-
+        self.on_canvas_click(event)
+        
         if CrosswordSquare.active_square and CrosswordSquare.active_square.state == "ACTIVE":
             
             CrosswordSquare.active_square.set_state("NORMAL")  # Deactivate the current active square
@@ -53,11 +53,29 @@ class CrosswordSquare:
         # Add more conditions for other states as needed
 
 
+    def on_canvas_click(self, event):
+        #cw_square_canvas = self.canvas  # Use the canvas associated with the CrosswordSquare object
+
+        x1, y1 = self.col * globals.grid_size, self.row * globals.grid_size
+        x2, y2 = x1 + globals.grid_size, y1 + globals.grid_size
+        # Calculate the coordinates of the center of the canvas
+        canvas_center = ((self.col * self.grid_size) + (self.grid_size / 2), (self.row * self.grid_size) + (self.grid_size / 2))
+
+        #if-function to define where click happened in square
+        if (event.y - canvas_center[1]) < 0 and abs(event.x - canvas_center[0]) < abs(event.y - canvas_center[1]):
+            print("Clicked on the top triangle")
+        elif (event.y - canvas_center[1]) > 0 and abs(event.x - canvas_center[0]) < abs(event.y - canvas_center[1]):
+            print("Clicked on the bottom triangle")
+        elif (event.x - canvas_center[0]) > 0 and abs(event.y - canvas_center[1]) < abs(event.x - canvas_center[0]):
+            print("Clicked on the right triangle")
+        elif (event.x - canvas_center[0]) < 0 and abs(event.y - canvas_center[1]) < abs(event.x - canvas_center[0]):
+            print("Clicked on the left triangle")
+
 
 
     def on_click_release(self, event):
         #Release new position for rectangle selection
-        print("Hej")
+        return
 
 
     
@@ -75,6 +93,7 @@ class CrosswordSquare:
         if new_state == "DISABLED":
             fill_color, outline_color, dash_pattern = "lightgrey", "darkgrey", (5, 1, 2, 1)
             self.canvas.unbind("<KeyPress>")  # Unbind key press event when not in "ACTIVE" state
+            self.canvas.tag_lower(self.item_id)
         elif new_state == "ACTIVE":
             CrosswordSquare.active_square = self
             self.canvas.focus_set()  # Set focus to the canvas to capture key presses
@@ -130,10 +149,8 @@ class CrosswordSquare:
         elif event.keysym in {'Up', 'Down', 'Left', 'Right'}:
             # Handle arrow key press
             globals.arrow_key_pressed = True
-            arrow_globals.directions = {'Up': 2, 'Down': 0, 'Left': 3, 'Right': 1}
-            self.active_direction_highlight("white")
-            #globals.temp_direction = globals.direction
-            globals.temp_direction = arrow_globals.directions[event.keysym]
+            arrow_directions = {'Up': 2, 'Down': 0, 'Left': 3, 'Right': 1}
+            globals.temp_direction = arrow_directions[event.keysym]
             self.goto_next_square()
             return
         elif event.keysym == 'period':
@@ -159,9 +176,6 @@ class CrosswordSquare:
     
 
     def goto_next_square(self):
-        print(globals.direction)
-        print(globals.temp_direction)
-        print(globals.arrow_key_pressed)
         # Switch to the next square based on the globals.direction
         globals.r, globals.c = self.row, self.col
         next_row, next_col = globals.r, globals.c
@@ -196,6 +210,8 @@ class CrosswordSquare:
                     self.active_direction_highlight("white")
                 next_sq.set_state("ACTIVE")
                 next_sq.active_direction_highlight("beige")
+            else:
+                self.active_direction_highlight("beige")
 
         globals.arrow_key_pressed = False
 
@@ -260,7 +276,6 @@ class CrosswordSquare:
                 break  # Stop highlighting if a blocked square is encountered
         # Convert the list of highlighted letters to a string
         globals.highlighted_string = "".join(highlighted_letters)
-        print("Highlighted Letters:", globals.highlighted_string)
 
         # Optionally, you can use the globals.highlighted_string for text filtering
         if globals.dictionary_file_path and globals.filtering_enabled:
@@ -271,6 +286,7 @@ class CrosswordSquare:
     def show_popup_menu(self, event):
         popup_menu = tk.Menu(self.canvas, tearoff=0)
         popup_menu.add_command(label="Key Square", command=self.add_key_square)
+        popup_menu.add_command(label="Disable Square", command=self.disable_square)
         popup_menu.add_command(label="Join Squares", command=self.join_squares)
         popup_menu.add_command(label="Import Image", command=self.import_image)
         popup_menu.post(event.x_root, event.y_root)
@@ -280,6 +296,11 @@ class CrosswordSquare:
         self.set_state("KEY")
         print("Adding Key Squares")
         
+    def disable_square(self):
+        # Implement joining logic for disabling squares
+        self.set_state("DISABLED")
+        print("Joining squares")
+
 
     def join_squares(self):
         # Implement joining logic for selected squares

@@ -1,6 +1,6 @@
 #TODO
+#possibility to add index numbers in squares
 #Leftclickdrag to activate several squares or make one larger
-#handle images
 
 import tkinter as tk
 from CrosswordSquare import CrosswordSquare
@@ -84,6 +84,9 @@ def stop_drag(event):
 def on_square_hover(event):
     if is_dragging:
         item_id = globals.canvas.find_closest(event.x, event.y)
+        if 'current' in globals.canvas.gettags(item_id):
+            return  # Ignore hover events over non-grid items
+            
         row, col = map(int, globals.canvas.gettags(item_id)[0].split('_'))
         globals.grid[row][col].on_square_click(event)
 

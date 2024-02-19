@@ -1,6 +1,6 @@
 #TODO
 #possibility to add index numbers in squares
-#Leftclickdrag to activate several squares or make one larger
+#Leftclickdrag to make one larger square
 #Possibility to split key squares
 
 
@@ -77,28 +77,21 @@ globals.canvas.pack()
 
 
 
-def start_drag(event):
-    global is_dragging
-    is_dragging = True
 
-def stop_drag(event):
-    global is_dragging
-    is_dragging = False
 
-def on_square_hover(event):
-    if is_dragging:
-        item_id = globals.canvas.find_closest(event.x, event.y)
-        if 'current' in globals.canvas.gettags(item_id):
-            return  # Ignore hover events over non-grid items
-            
-        row, col = map(int, globals.canvas.gettags(item_id)[0].split('_'))
-        globals.grid[row][col].on_square_click(event)
 
-# Set up drag-and-drop variables
-is_dragging = False
-globals.canvas.bind("<ButtonPress-1>", start_drag)
-globals.canvas.bind("<ButtonRelease-1>", stop_drag)
-globals.canvas.bind("<Motion>", on_square_hover)
+def start_pan(event):
+    # Record the starting position of the mouse
+    globals.canvas.scan_mark(event.x, event.y)
+
+def pan_canvas(event):
+    # Compute the distance moved by the mouse
+    globals.canvas.scan_dragto(event.x, event.y, gain=1)
+
+
+# Bind mouse events to canvas for panning
+globals.canvas.bind("<ButtonPress-2>", start_pan)  # Mouse wheel click pressed
+globals.canvas.bind("<B2-Motion>", pan_canvas)     # Mouse wheel clicked and dragged
 
 
 # Create CrosswordSquare instances for each square in the grid

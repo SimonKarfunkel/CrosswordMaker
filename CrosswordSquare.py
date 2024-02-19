@@ -19,17 +19,27 @@ class CrosswordSquare:
         self.state = "DISABLED"
         self.value = ""
         self.text_label = None
+        self.initial_square = None  # Store the initial square for drag operation
+        self.final_square = None  # Store the final square for drag operation 
+
 
         x1, y1 = col * grid_size, row * grid_size
         x2, y2 = x1 + grid_size, y1 + grid_size
         self.item_id = canvas.create_rectangle(x1, y1, x2, y2, fill="lightgrey", outline="darkgrey", dash=(7,1,1,1), tags=f"{row}_{col}")
-        canvas.tag_bind(self.item_id, "<Button-1>", self.on_square_click)
-        canvas.tag_bind(self.item_id, "<ButtonRelease-1>", self.on_click_release)
+        canvas.tag_bind(self.item_id, "<ButtonPress-1>", self.on_square_click)
+        #canvas.tag_bind(self.item_id, "<ButtonRelease-1>", self.on_click_release)
         canvas.tag_bind(self.item_id, "<Button-3>", self.on_square_right_click)
+        
+        # Set up drag-and-drop variables
+        #canvas.tag_bind(self.item_id, "<ButtonPress-1>", self.start_drag)
+        canvas.tag_bind(self.item_id, "<ButtonRelease-1>", self.stop_drag)
+        canvas.tag_bind(self.item_id, "<Motion>", self.on_square_hover)
         
 
     
     def on_square_click(self, event):
+        self.initial_square = (self.row, self.col)
+
         if self.state == "BLOCK" or self.state == "KEY":
             if self.state == "KEY" and CrosswordSquare.active_square and CrosswordSquare.active_square.state == "ACTIVE":            
                 
@@ -83,7 +93,7 @@ class CrosswordSquare:
 
     def on_square_right_click(self, event):
         # Implement behavior for right-click
-        self.show_popup_menu(event)
+        self.show_right_click_popup_menu(event)
 
         pass
 
@@ -294,13 +304,21 @@ class CrosswordSquare:
 
 
 
-    def show_popup_menu(self, event):
+    def show_right_click_popup_menu(self, event):
         popup_menu = tk.Menu(self.canvas, tearoff=0)
         popup_menu.add_command(label="Key Square", command=self.add_key_square)
         popup_menu.add_command(label="Disable Square", command=self.disable_square)
         popup_menu.add_command(label="Join Squares", command=self.join_squares)
         popup_menu.add_command(label="Import Image", command=self.import_image)
         popup_menu.post(event.x_root, event.y_root)
+
+    def show_left_drag_popup_menu(self):
+        popup_menu = tk.Menu(self.canvas, tearoff=0)
+        popup_menu.add_command(label="Normal Squares", command=self.set_range_of_squares)
+        popup_menu.add_command(label="Disable Squares", command=self.disable_square)
+        popup_menu.add_command(label="Join Squares", command=self.join_squares)
+        popup_menu.add_command(label="Import Image", command=self.import_image)
+        popup_menu.post(self.final_square[1] * self.grid_size, self.final_square[0] * self.grid_size)
 
     def add_key_square(self):
         # Implement logic for selected squares
@@ -328,7 +346,7 @@ class CrosswordSquare:
         text_y = self.row * self.grid_size + self.grid_size // 2
 
         # Wrap the text to fit within the square size without breaking long words
-        wrapped_text = "\n".join(textwrap.wrap(self.value, width=8, break_long_words=False))
+        wrapped_text = "\n".join(textwrap.wrap(self.value, width=7, break_long_words=True))
 
         # Get the fill color of the square on the canvas
         square_fill_color = self.canvas.itemcget(self.item_id, "fill")
@@ -345,3 +363,48 @@ class CrosswordSquare:
         elif self.state == "KEY":
             self.text_label = tk.Label(self.canvas, text=wrapped_text, font=globals.font_key, width=7, bg=square_fill_color)
             self.text_label.place(x=text_x, y=text_y, anchor="center")
+
+
+
+
+    #def start_drag(self, event):
+    #    # Record the initial square where the drag operation started
+    #    self.initial_square = (self.row, self.col)
+
+    def stop_drag(self, event):
+        # Record the final square where the drag operation ended
+        item_id = self.canvas.find_closest(event.x, event.y)
+        row, col = map(int, self.canvas.gettags(item_id)[0].split('_'))
+        self.final_square = (row, col)
+
+        # Calculate the rectangle of squares encompassed by the drag operation
+        if self.initial_square and self.final_square and not self.initial_square == self.final_square:
+            self.show_left_drag_popup_menu()
+
+        
+
+    def set_range_of_squares(self):
+        min_row = min(self.initial_square[0], self.final_square[0])
+        max_row = max(self.initial_square[0], self.final_square[0])
+        min_col = min(self.initial_square[1], self.final_square[1])
+        max_col = max(self.initial_square[1], self.final_square[1])
+
+        # Iterate over the squares in the rectangle
+        for row in range(min_row, max_row + 1):
+            for col in range(min_col, max_col + 1):
+                # Access the square at (row, col) and perform necessary actions
+                square = globals.grid[row][col]
+                square.set_state("NORMAL")  
+
+        # Reset initial and final squares
+        self.initial_square = None
+        self.final_square = None   
+
+    def on_square_hover(self, event):
+        #item_id = globals.canvas.find_closest(event.x, event.y)
+        #if 'current' in globals.canvas.gettags(item_id):
+        #    return  # Ignore hover events over non-grid items
+                
+        #row, col = map(int, globals.canvas.gettags(item_id)[0].split('_'))
+        #globals.grid[row][col].on_square_click(event)
+        return

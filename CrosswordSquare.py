@@ -18,6 +18,7 @@ class CrosswordSquare:
         self.grid_size = grid_size
         self.state = "DISABLED"
         self.value = ""
+        self.text_label = None
 
         x1, y1 = col * grid_size, row * grid_size
         x2, y2 = x1 + grid_size, y1 + grid_size
@@ -99,8 +100,12 @@ class CrosswordSquare:
             self.canvas.focus_set()  # Set focus to the canvas to capture key presses
             self.canvas.bind("<KeyPress>", self.on_key_press)  # Bind key press event
             fill_color, outline_color, dash_pattern = "lightcyan", "blue", ()
+            if self.text_label:
+                self.text_label.config(bg = "lightcyan")
         elif new_state == "NORMAL":
             fill_color, outline_color, dash_pattern = "white", "black", ()
+            if self.text_label:
+                self.text_label.config(bg = "white")
         elif new_state == "BLOCK":
             fill_color, outline_color, dash_pattern = "black", "black", ()
         elif new_state == "KEY":
@@ -237,6 +242,9 @@ class CrosswordSquare:
             next_sq = globals.grid[next_row][next_col]
             if next_sq.state == "NORMAL":
                 next_sq.canvas.itemconfig(next_sq.item_id, fill=highlight_colour)
+                if next_sq.text_label:
+                    next_sq.text_label.config(bg = highlight_colour)
+
                 if not next_sq.value:
                     highlighted_letters.append("*")  # Append letter to the list
                 else:
@@ -263,6 +271,9 @@ class CrosswordSquare:
             next_sq = globals.grid[next_row][next_col]
             if next_sq.state == "NORMAL":
                 next_sq.canvas.itemconfig(next_sq.item_id, fill=highlight_colour)
+                if next_sq.text_label:
+                    next_sq.text_label.config(bg = highlight_colour)
+
                 if not next_sq.value:
                     highlighted_letters.insert(0, "*")             # Prepend the letter to the beginning of the list
                 else:
@@ -316,64 +327,18 @@ class CrosswordSquare:
         text_x = self.col * self.grid_size + self.grid_size // 2
         text_y = self.row * self.grid_size + self.grid_size // 2
 
-        # Create or update the canvas text item with the new value
-        text_item = self.canvas.find_withtag(f"text_{self.row}_{self.col}")
-
         # Wrap the text to fit within the square size without breaking long words
-        font_size = self.grid_size // 2
-        wrapped_text = textwrap.fill(self.value, width=int(self.grid_size / 10), break_long_words=False)
+        wrapped_text = "\n".join(textwrap.wrap(self.value, width=int(self.grid_size / 10), break_long_words=False))
 
-        # Create a font with the current font size
-        font = ('Arial', font_size, 'bold')
+        # Get the fill color of the square on the canvas
+        square_fill_color = self.canvas.itemcget(self.item_id, "fill")
 
-        # Create or update the canvas text item with the new text and font, center-aligned
-        if text_item:
-            self.canvas.itemconfig(text_item, text=wrapped_text, font=font, anchor="center", state="disabled")
+        # Create or update the Label with the new text and font, center-aligned
+        if self.text_label:
+            self.text_label.config(text=wrapped_text, bg = square_fill_color)
         else:
-            text_item = self.canvas.create_text(text_x, text_y, text=wrapped_text, font=font, anchor="center", tags=f"text_{self.row}_{self.col}")
-
-        # Measure the width and height of the text rendered with the current font size
-        text_bbox = self.canvas.bbox(text_item)
-
-        # If the text bbox exists and both the width and height fit within the square size, exit
-        if text_bbox and (text_bbox[2] - text_bbox[0] <= self.grid_size and text_bbox[3] - text_bbox[1] <= self.grid_size):
-            return
-
-        # If the text doesn't fit within the square size, reduce the font size and try again
-        while font_size > 0:
-            # Decrease the font size by one step
-            font_size -= 1
-
-            # Create a font with the new font size
-            font = ('Arial', font_size, 'bold')
-
-            # Wrap the text to fit within the square size without breaking long words
-            wrapped_text = textwrap.fill(self.value, width=int(self.grid_size / 10), break_long_words=False)
-
-            # Create or update the canvas text item with the new text and font, center-aligned
-            if text_item:
-                self.canvas.itemconfig(text_item, text=wrapped_text, font=font, anchor="center", state="normal")
-            else:
-                text_item = self.canvas.create_text(text_x, text_y, text=wrapped_text, font=font, anchor="center", tags=f"text_{self.row}_{self.col}")
-
-            # Measure the width and height of the text rendered with the current font size
-            text_bbox = self.canvas.bbox(text_item)
-
-            # If the text bbox exists and both the width and height fit within the square size, exit
-            if text_bbox and (text_bbox[2] - text_bbox[0] <= self.grid_size and text_bbox[3] - text_bbox[1] <= self.grid_size):
-                break
-
-        # Adjust horizontal center alignment for each line of text
-        if text_item:
-            for index, line in enumerate(wrapped_text.split('\n')):
-                line_tag = f"text_{self.row}_{self.col}.{index + 1}"  # Tag for each line of text
-                line_bbox = self.canvas.bbox(line_tag)  # Get the bounding box of the line
-                if line_bbox:
-                    line_width = line_bbox[2] - line_bbox[0]  # Calculate the width of the line
-                    horizontal_offset = (self.grid_size - line_width) // 2  # Calculate horizontal offset
-                    self.canvas.move(line_tag, horizontal_offset, 0)  # Move the line to center it horizontally
+            self.text_label = tk.Label(self.canvas, text=wrapped_text, font=('Arial', self.grid_size // 2, 'bold'), bg=square_fill_color)
+            self.text_label.place(x=text_x, y=text_y, anchor="center")
 
 
-        # Delete temporary text items
-        self.canvas.delete("temp_text")
-
+        

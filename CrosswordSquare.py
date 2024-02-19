@@ -328,17 +328,20 @@ class CrosswordSquare:
         text_y = self.row * self.grid_size + self.grid_size // 2
 
         # Wrap the text to fit within the square size without breaking long words
-        wrapped_text = "\n".join(textwrap.wrap(self.value, width=int(self.grid_size / 10), break_long_words=False))
+        wrapped_text = "\n".join(textwrap.wrap(self.value, width=8, break_long_words=False))
 
         # Get the fill color of the square on the canvas
         square_fill_color = self.canvas.itemcget(self.item_id, "fill")
-
+           
         # Create or update the Label with the new text and font, center-aligned
         if self.text_label:
-            self.text_label.config(text=wrapped_text, bg = square_fill_color)
-        else:
-            self.text_label = tk.Label(self.canvas, text=wrapped_text, font=('Arial', self.grid_size // 2, 'bold'), bg=square_fill_color)
+            if self.state == "KEY":
+                self.text_label.config(text=wrapped_text, bg=square_fill_color, font=globals.font_key)
+                return
+            self.text_label.config(text=wrapped_text, bg=square_fill_color, font=globals.font_normal)
+        elif self.state == "ACTIVE":
+            self.text_label = tk.Label(self.canvas, text=wrapped_text, width=1, font=globals.font_normal, bg=square_fill_color)
             self.text_label.place(x=text_x, y=text_y, anchor="center")
-
-
-        
+        elif self.state == "KEY":
+            self.text_label = tk.Label(self.canvas, text=wrapped_text, font=globals.font_key, width=7, bg=square_fill_color)
+            self.text_label.place(x=text_x, y=text_y, anchor="center")

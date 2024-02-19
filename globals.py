@@ -1,9 +1,17 @@
+
 root = None
 canvas = None
 direction = 0   #Setting to horizontal or vertical progression
 temp_direction = 0
 arrow_key_pressed = False
-font = ('Arial', 25, 'bold')
+
+#font sizes and styles -------------------------------------------------------------------
+
+font_normal = ('Comic Sans MS', 25)
+font_key = ('Comic Sans MS', 8)
+
+#FONT END----------------------------------------------------------------------------------
+
 sidebar_frame = None  # Initialize sidebar_frame as None
 filtering_enabled = False
 dictionary_file_path = "svenska-ord.txt"
@@ -16,6 +24,6 @@ r = None    #row of active square
 c = None    #column of active square
 
 # Set up grid dimensions
-grid_size = 50
+grid_size = 60
 rows, cols = 50, 50
 image_tk = None

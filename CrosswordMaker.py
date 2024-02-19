@@ -1,11 +1,14 @@
 #TODO
 #possibility to add index numbers in squares
 #Leftclickdrag to activate several squares or make one larger
+#Possibility to split key squares
+
 
 import tkinter as tk
 from CrosswordSquare import CrosswordSquare
 import globals
 import textfiltering
+from tkinter import font
 
 
 def dummy_command():
@@ -68,6 +71,7 @@ globals.root.config(menu=menu_bar)
 # Create a Canvas widget to represent the grid
 globals.canvas = tk.Canvas(globals.root, width=globals.cols * globals.grid_size, height=globals.rows * globals.grid_size)
 globals.canvas.pack()
+
 
 
 

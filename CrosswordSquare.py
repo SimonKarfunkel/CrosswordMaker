@@ -312,13 +312,14 @@ class CrosswordSquare:
         popup_menu.add_command(label="Import Image", command=self.import_image)
         popup_menu.post(event.x_root, event.y_root)
 
-    def show_left_drag_popup_menu(self):
+    def show_left_drag_popup_menu(self, x1, y1):
         popup_menu = tk.Menu(self.canvas, tearoff=0)
         popup_menu.add_command(label="Normal Squares", command=self.set_range_of_squares)
         popup_menu.add_command(label="Disable Squares", command=self.disable_square)
         popup_menu.add_command(label="Join Squares", command=self.join_squares)
         popup_menu.add_command(label="Import Image", command=self.import_image)
-        popup_menu.post(self.final_square[1] * self.grid_size, self.final_square[0] * self.grid_size)
+        popup_menu.post(x1, y1)
+        #popup_menu.post((self.final_square[1] * self.grid_size) - globals.pan_offset_x, ((self.final_square[0] -1) * self.grid_size) - globals.pan_offset_y)
 
     def add_key_square(self):
         # Implement logic for selected squares
@@ -355,14 +356,15 @@ class CrosswordSquare:
         if self.text_label:
             if self.state == "KEY":
                 self.text_label.config(text=wrapped_text, bg=square_fill_color, font=globals.font_key)
-                return
-            self.text_label.config(text=wrapped_text, bg=square_fill_color, font=globals.font_normal)
-        elif self.state == "ACTIVE":
-            self.text_label = tk.Label(self.canvas, text=wrapped_text, width=1, font=globals.font_normal, bg=square_fill_color)
-            self.text_label.place(x=text_x, y=text_y, anchor="center")
-        elif self.state == "KEY":
-            self.text_label = tk.Label(self.canvas, text=wrapped_text, font=globals.font_key, width=7, bg=square_fill_color)
-            self.text_label.place(x=text_x, y=text_y, anchor="center")
+            else:
+                self.text_label.config(text=wrapped_text, bg=square_fill_color, font=globals.font_normal)
+        else:
+            if self.state == "ACTIVE":
+                self.text_label = tk.Label(self.canvas, text=wrapped_text, width=1, font=globals.font_normal, bg=square_fill_color)
+                self.text_label.place(x=text_x - globals.pan_offset_x, y=text_y - globals.pan_offset_y, anchor="center")
+            elif self.state == "KEY":
+                self.text_label = tk.Label(self.canvas, text=wrapped_text, font=globals.font_key, width=7, bg=square_fill_color)
+                self.text_label.place(x=text_x - globals.pan_offset_x, y=text_y - globals.pan_offset_y, anchor="center")
 
 
 
@@ -373,13 +375,13 @@ class CrosswordSquare:
 
     def stop_drag(self, event):
         # Record the final square where the drag operation ended
-        item_id = self.canvas.find_closest(event.x, event.y)
+        item_id = self.canvas.find_closest(event.x + globals.pan_offset_x, event.y + globals.pan_offset_y)
         row, col = map(int, self.canvas.gettags(item_id)[0].split('_'))
         self.final_square = (row, col)
 
         # Calculate the rectangle of squares encompassed by the drag operation
         if self.initial_square and self.final_square and not self.initial_square == self.final_square:
-            self.show_left_drag_popup_menu()
+            self.show_left_drag_popup_menu(event.x, event.y)
 
         
 

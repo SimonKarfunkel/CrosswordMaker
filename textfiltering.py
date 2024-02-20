@@ -137,9 +137,9 @@ def on_line_click(event):
 
         # Create or update the canvas text item with the new text and font, center-aligned
         if text_item:
-            next_sq.canvas.itemconfig(text_item, text=next_sq.value, font=globals.font, anchor="center", state="disabled")
+            next_sq.canvas.itemconfig(text_item, text=next_sq.value, font=globals.font_normal, anchor="center", state="disabled")
         else:
-            text_item = next_sq.canvas.create_text(text_x, text_y, text=next_sq.value, font=globals.font, anchor="center", tags=f"text_{next_row}_{next_col}")
+            text_item = next_sq.canvas.create_text(text_x, text_y, text=next_sq.value, font=globals.font_normal, anchor="center", tags=f"text_{next_row}_{next_col}")
 
         # Move to the next square in the current globals.direction
         if globals.direction == 0:

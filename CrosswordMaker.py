@@ -83,22 +83,51 @@ globals.canvas.pack()
 def start_pan(event):
     # Record the starting position of the mouse
     globals.canvas.scan_mark(event.x, event.y)
+    globals.pan_start = (event.x, event.y)
 
 def pan_canvas(event):
     # Compute the distance moved by the mouse
     globals.canvas.scan_dragto(event.x, event.y, gain=1)
 
 
+    # Compute the distance moved by the mouse
+    x_distance = (event.x) - globals.pan_start[0]
+    y_distance = (event.y) - globals.pan_start[1]
+
+    # Update the total panned distance
+    globals.pan_offset_x -= x_distance
+    globals.pan_offset_y -= y_distance
+
+    # Move all labels along with the canvas
+    for row in globals.grid:
+        for square in row:
+            if square.text_label:
+                # Get the relative position of the label within its parent CrosswordSquare canvas
+                relative_x = square.col * globals.grid_size + globals.grid_size // 2 - globals.pan_offset_x
+                relative_y = square.row * globals.grid_size + globals.grid_size // 2 - globals.pan_offset_y
+                
+                # Move the label by updating its position within its parent CrosswordSquare canvas
+                square.text_label.place(x=relative_x, y=relative_y, anchor="center")
+
+    globals.pan_start = (event.x, event.y)
+
+
+def stop_pan(event):
+    print(globals.pan_offset_x, globals.pan_offset_y)  # You can leave this empty if no action is needed when panning stops
+
 # Bind mouse events to canvas for panning
 globals.canvas.bind("<ButtonPress-2>", start_pan)  # Mouse wheel click pressed
 globals.canvas.bind("<B2-Motion>", pan_canvas)     # Mouse wheel clicked and dragged
+globals.canvas.bind("<ButtonRelease-2>", stop_pan)     # Mouse wheel released
 
 
 # Create CrosswordSquare instances for each square in the grid
 globals.grid = [[CrosswordSquare(globals.canvas, row, col, globals.grid_size) for col in range(globals.cols)] for row in range(globals.rows)]
 
-# Configure the Tkinter window to be fullscreen
+# Configure the Tkinter window to not be fullscreen
 globals.root.attributes("-fullscreen", False)
+globals.root.geometry("1024x768")
+
 
 # Main Tkinter event loop
 globals.root.mainloop()

@@ -27,3 +27,9 @@ c = None    #column of active square
 grid_size = 60
 rows, cols = 50, 50
 image_tk = None
+
+pan_start = None
+
+
+pan_offset_x = 0     #To store the panning offset for moving labels etc.
+pan_offset_y = 0
